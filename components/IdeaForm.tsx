@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AIIdea, DevelopmentPhase, Tool, Difficulty, ExpectedEffect } from '@/types';
+import { AIIdea, DevelopmentPhase, Tool, Difficulty, ExpectedEffect, developmentPhaseSteps } from '@/types';
 
 interface IdeaFormProps {
   idea: AIIdea;
@@ -12,7 +12,23 @@ interface IdeaFormProps {
 
 export default function IdeaForm({ idea, onChange, onDelete, showDelete = false }: IdeaFormProps) {
   const handleChange = (field: keyof AIIdea, value: string) => {
-    onChange({ ...idea, [field]: value } as AIIdea);
+    // 開発工程が変更された場合、工程ステップをリセット
+    if (field === '開発工程') {
+      onChange({ ...idea, [field]: value, 工程ステップ: '' } as AIIdea);
+    } else {
+      onChange({ ...idea, [field]: value } as AIIdea);
+    }
+  };
+
+  const handleStepSelect = (step: string) => {
+    onChange({ ...idea, 工程ステップ: step } as AIIdea);
+  };
+
+  const getAvailableSteps = (): string[] => {
+    if (!idea.開発工程 || !(idea.開発工程 in developmentPhaseSteps)) {
+      return [];
+    }
+    return developmentPhaseSteps[idea.開発工程 as DevelopmentPhase] || [];
   };
 
   return (
@@ -48,6 +64,36 @@ export default function IdeaForm({ idea, onChange, onDelete, showDelete = false 
             <option value="その他PM業務">その他PM業務</option>
           </select>
         </div>
+
+        {/* 工程ステップ（開発工程選択後に表示） */}
+        {idea.開発工程 && getAvailableSteps().length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              工程ステップ（任意）
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {getAvailableSteps().map((step) => (
+                <button
+                  key={step}
+                  type="button"
+                  onClick={() => handleStepSelect(step)}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    idea.工程ステップ === step
+                      ? 'bg-blue-500 text-white hover:bg-blue-600'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                  }`}
+                >
+                  {step}
+                </button>
+              ))}
+            </div>
+            {idea.工程ステップ && (
+              <p className="text-xs text-gray-500 mt-2">
+                選択中: <span className="font-medium text-blue-600">{idea.工程ステップ}</span>
+              </p>
+            )}
+          </div>
+        )}
 
         {/* ASIS：現状のタスク */}
         <div>

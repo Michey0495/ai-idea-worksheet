@@ -8,7 +8,56 @@ interface ExportSectionProps {
 }
 
 export default function ExportSection({ ideas }: ExportSectionProps) {
-  const [exportFormat, setExportFormat] = useState<'structured' | 'json'>('structured');
+  const [exportFormat, setExportFormat] = useState<'prompt' | 'structured' | 'json'>('prompt');
+
+  const generateAIPrompt = () => {
+    let prompt = '以下の業務課題に対して、AIツール（NotebookLMまたはGemini）を活用した解決策を提案してください。\n\n';
+    prompt += '## 業務課題\n\n';
+
+    ideas.forEach((idea, index) => {
+      if (!idea.ASIS現状のタスク || !idea.開発工程) return;
+      
+      prompt += `### 課題${index + 1}: ${idea.開発工程}工程での課題\n\n`;
+      prompt += `**現状のタスク（困っていること）:**\n${idea.ASIS現状のタスク}\n\n`;
+      
+      if (idea.準備資料) {
+        prompt += `**準備できる資料:** ${idea.準備資料}\n\n`;
+      }
+      
+      prompt += `**使用可能なツール:** ${idea.使用ツール}\n\n`;
+      
+      if (idea.期待される成果物) {
+        prompt += `**期待される成果物:** ${idea.期待される成果物}\n\n`;
+      }
+      
+      prompt += `**難易度:** ${idea.難易度}\n`;
+      prompt += `**所要時間の目安:** ${idea.所要時間}\n`;
+      prompt += `**期待効果:** ${idea.期待効果}\n\n`;
+      
+      prompt += '**解決策の要件:**\n';
+      prompt += `- ${idea.使用ツール}を使用して、上記の課題を解決する具体的な手順を提案してください\n`;
+      prompt += `- 具体的な指示内容（プロンプト）を含めてください\n`;
+      prompt += `- プレースホルダー（{プロジェクト名}、{システム名}など）を使用して、汎用的な形式にしてください\n`;
+      if (idea.TOBE_AI活用アイデア) {
+        prompt += `- 参考例: ${idea.TOBE_AI活用アイデア.substring(0, 200)}...\n`;
+      }
+      prompt += '\n';
+      
+      prompt += '---\n\n';
+    });
+
+    prompt += '## 回答形式\n\n';
+    prompt += '各課題に対して、以下の形式で回答してください：\n\n';
+    prompt += '1. **使用ツール**: NotebookLM または Gemini\n';
+    prompt += '2. **準備する資料**: 具体的な資料の種類と形式\n';
+    prompt += '3. **具体的な手順**: ステップバイステップの手順\n';
+    prompt += '4. **AIへの指示内容（プロンプト）**: そのままコピー&ペーストできる形式\n';
+    prompt += '5. **期待される成果物**: どのような結果が得られるか\n';
+    prompt += '6. **注意点やコツ**: 実践時のポイント\n\n';
+    prompt += '回答は実践的で、すぐに使える形式でお願いします。';
+
+    return prompt;
+  };
 
   const generateStructuredText = () => {
     let text = '# AI活用アイデアシート\n\n';
@@ -58,15 +107,36 @@ export default function ExportSection({ ideas }: ExportSectionProps) {
     return JSON.stringify(ideas, null, 2);
   };
 
+  const getContent = () => {
+    switch (exportFormat) {
+      case 'prompt':
+        return generateAIPrompt();
+      case 'structured':
+        return generateStructuredText();
+      case 'json':
+        return generateJSON();
+    }
+  };
+
+  const getFileName = () => {
+    const date = new Date().toISOString().split('T')[0];
+    switch (exportFormat) {
+      case 'prompt':
+        return `AI活用アイデアシート_プロンプト_${date}.txt`;
+      case 'structured':
+        return `AI活用アイデアシート_${date}.txt`;
+      case 'json':
+        return `AI活用アイデアシート_${date}.json`;
+    }
+  };
+
   const handleExport = () => {
-    const content = exportFormat === 'structured' ? generateStructuredText() : generateJSON();
+    const content = getContent();
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = exportFormat === 'structured' 
-      ? `AI活用アイデアシート_${new Date().toISOString().split('T')[0]}.txt`
-      : `AI活用アイデアシート_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = getFileName();
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -74,7 +144,7 @@ export default function ExportSection({ ideas }: ExportSectionProps) {
   };
 
   const handleCopy = () => {
-    const content = exportFormat === 'structured' ? generateStructuredText() : generateJSON();
+    const content = getContent();
     navigator.clipboard.writeText(content).then(() => {
       alert('クリップボードにコピーしました！');
     });
@@ -88,50 +158,75 @@ export default function ExportSection({ ideas }: ExportSectionProps) {
         <label className="block text-sm font-medium text-gray-700 mb-2">
           出力形式
         </label>
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center">
+            <input
+              type="radio"
+              value="prompt"
+              checked={exportFormat === 'prompt'}
+              onChange={(e) => setExportFormat(e.target.value as 'prompt' | 'structured' | 'json')}
+              className="mr-2"
+            />
+            <span className="text-gray-700">
+              AIチャット用プロンプト（推奨）
+              <span className="text-xs text-gray-500 ml-2">- AIチャットに貼り付けて解決策を提案してもらう</span>
+            </span>
+          </label>
           <label className="flex items-center">
             <input
               type="radio"
               value="structured"
               checked={exportFormat === 'structured'}
-              onChange={(e) => setExportFormat(e.target.value as 'structured' | 'json')}
+              onChange={(e) => setExportFormat(e.target.value as 'prompt' | 'structured' | 'json')}
               className="mr-2"
             />
-            構造化テキスト形式
+            <span className="text-gray-700">構造化テキスト形式</span>
           </label>
           <label className="flex items-center">
             <input
               type="radio"
               value="json"
               checked={exportFormat === 'json'}
-              onChange={(e) => setExportFormat(e.target.value as 'structured' | 'json')}
+              onChange={(e) => setExportFormat(e.target.value as 'prompt' | 'structured' | 'json')}
               className="mr-2"
             />
-            JSON形式
+            <span className="text-gray-700">JSON形式</span>
           </label>
         </div>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 mb-4">
         <button
           onClick={handleCopy}
-          className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors font-medium"
         >
-          クリップボードにコピー
+          プロンプトをコピー
         </button>
         <button
           onClick={handleExport}
-          className="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+          className="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600 transition-colors font-medium"
         >
-          ファイルをダウンロード
+          エクスポート
         </button>
       </div>
 
-      {exportFormat === 'structured' && (
+      {exportFormat === 'prompt' && (
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded">
+          <h3 className="text-sm font-medium text-blue-800 mb-2">AIチャット用プロンプトについて</h3>
+          <p className="text-sm text-blue-700 mb-2">
+            このプロンプトをChatGPT、Claude、GeminiなどのAIチャットに貼り付けると、入力した業務課題に対して具体的な解決策を提案してくれます。
+          </p>
+          <p className="text-sm text-blue-700">
+            プロンプトには、各課題の現状、使用可能なツール、期待される成果物などが含まれており、AIが適切な解決策を提案できるようになっています。
+          </p>
+        </div>
+      )}
+
+      {(exportFormat === 'prompt' || exportFormat === 'structured') && (
         <div className="mt-4 p-4 bg-gray-50 rounded">
           <h3 className="text-sm font-medium text-gray-700 mb-2">プレビュー（最初の1000文字）</h3>
-          <pre className="text-xs text-gray-600 whitespace-pre-wrap overflow-auto max-h-40">
-            {generateStructuredText().substring(0, 1000)}...
+          <pre className="text-xs text-gray-700 whitespace-pre-wrap overflow-auto max-h-40 bg-white p-3 rounded border">
+            {getContent().substring(0, 1000)}...
           </pre>
         </div>
       )}

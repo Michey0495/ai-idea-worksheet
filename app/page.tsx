@@ -117,8 +117,8 @@ export default function Home() {
           <ol className="list-decimal list-inside space-y-2 text-gray-700">
             <li>各項目を入力してください（<span className="text-red-500">*</span>は必須項目です）</li>
             <li>複数のアイデアを追加する場合は「+ 新しいアイデアを追加」ボタンをクリック</li>
-            <li>入力完了後、「エクスポート」セクションから構造化テキストまたはJSON形式で出力できます</li>
-            <li>出力したテキストは、AIチャットやドキュメント作成に活用できます</li>
+            <li>入力完了後、「エクスポート」セクションからAIチャット用プロンプト、構造化テキスト、またはJSON形式でエクスポートできます</li>
+            <li>AIチャット用プロンプトをコピーして、ChatGPTやClaudeなどのAIチャットに貼り付けると、解決策を提案してくれます</li>
           </ol>
         </div>
 

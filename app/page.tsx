@@ -3,9 +3,22 @@
 import { useState } from 'react';
 import IdeaForm from '@/components/IdeaForm';
 import ExportSection from '@/components/ExportSection';
+import PrivacySecurity from '@/components/PrivacySecurity';
 import { AIIdea } from '@/types';
 
+/**
+ * AI活用アイデアシート Webアプリ
+ * 
+ * セキュリティとプライバシー:
+ * - すべてのデータはReactのuseStateで管理され、ブラウザのメモリ（RAM）にのみ存在します
+ * - ローカルストレージ、セッションストレージ、Cookieには一切保存されません
+ * - サーバーにデータを送信することはありません（APIルートは使用していません）
+ * - データベース接続はありません
+ * - ページを閉じると、すべてのデータは完全に消去されます
+ * - エクスポート機能はブラウザ内で完結し、ファイルはローカルにダウンロードされるのみです
+ */
 export default function Home() {
+  // データはReactのuseStateで管理。ページを閉じると消去される
   const [ideas, setIdeas] = useState<AIIdea[]>([
     {
       id: '1',
@@ -137,6 +150,8 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        <PrivacySecurity />
       </div>
     </main>
   );

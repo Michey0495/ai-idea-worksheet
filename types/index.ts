@@ -1,7 +1,7 @@
 export interface AIIdea {
   id: string;
   開発工程: string;
-  工程ステップ?: string;
+  工程ステップ?: string[]; // 複数選択可能
   ASIS現状のタスク: string;
   使用ツール: string;
   準備資料: string;

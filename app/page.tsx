@@ -23,7 +23,7 @@ export default function Home() {
     {
       id: '1',
       開発工程: '',
-      工程ステップ: '',
+      工程ステップ: [],
       ASIS現状のタスク: '',
       使用ツール: '',
       準備資料: '',
@@ -39,7 +39,7 @@ export default function Home() {
     const newIdea: AIIdea = {
       id: String(ideas.length + 1),
       開発工程: '',
-      工程ステップ: '',
+      工程ステップ: [],
       ASIS現状のタスク: '',
       使用ツール: '',
       準備資料: '',
@@ -73,7 +73,7 @@ export default function Home() {
         {
           id: '1',
           開発工程: '',
-          工程ステップ: '',
+          工程ステップ: [],
           ASIS現状のタスク: '',
           使用ツール: '',
           準備資料: '',

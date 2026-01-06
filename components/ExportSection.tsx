@@ -18,8 +18,8 @@ export default function ExportSection({ ideas }: ExportSectionProps) {
       if (!idea.ASIS現状のタスク || !idea.開発工程) return;
       
       prompt += `### 課題${index + 1}: ${idea.開発工程}工程での課題\n\n`;
-      if (idea.工程ステップ) {
-        prompt += `**工程ステップ:** ${idea.工程ステップ}\n\n`;
+      if (idea.工程ステップ && idea.工程ステップ.length > 0) {
+        prompt += `**工程ステップ:** ${idea.工程ステップ.join('、')}\n\n`;
       }
       prompt += `**現状のタスク（困っていること）:**\n${idea.ASIS現状のタスク}\n\n`;
       
@@ -71,8 +71,8 @@ export default function ExportSection({ ideas }: ExportSectionProps) {
     ideas.forEach((idea, index) => {
       text += `## アイデア ${index + 1}\n\n`;
       text += `**開発工程:** ${idea.開発工程}\n\n`;
-      if (idea.工程ステップ) {
-        text += `**工程ステップ:** ${idea.工程ステップ}\n\n`;
+      if (idea.工程ステップ && idea.工程ステップ.length > 0) {
+        text += `**工程ステップ:** ${idea.工程ステップ.join('、')}\n\n`;
       }
       text += `**ASIS：現状のタスク:**\n${idea.ASIS現状のタスク}\n\n`;
       text += `**使用ツール:** ${idea.使用ツール}\n\n`;

@@ -14,14 +14,23 @@ export default function IdeaForm({ idea, onChange, onDelete, showDelete = false 
   const handleChange = (field: keyof AIIdea, value: string) => {
     // 開発工程が変更された場合、工程ステップをリセット
     if (field === '開発工程') {
-      onChange({ ...idea, [field]: value, 工程ステップ: '' } as AIIdea);
+      onChange({ ...idea, [field]: value, 工程ステップ: [] } as AIIdea);
     } else {
       onChange({ ...idea, [field]: value } as AIIdea);
     }
   };
 
   const handleStepSelect = (step: string) => {
-    onChange({ ...idea, 工程ステップ: step } as AIIdea);
+    const currentSteps = idea.工程ステップ || [];
+    const isSelected = currentSteps.includes(step);
+    
+    if (isSelected) {
+      // 既に選択されている場合は削除
+      onChange({ ...idea, 工程ステップ: currentSteps.filter(s => s !== step) } as AIIdea);
+    } else {
+      // 選択されていない場合は追加
+      onChange({ ...idea, 工程ステップ: [...currentSteps, step] } as AIIdea);
+    }
   };
 
   const getAvailableSteps = (): string[] => {
@@ -69,27 +78,31 @@ export default function IdeaForm({ idea, onChange, onDelete, showDelete = false 
         {idea.開発工程 && getAvailableSteps().length > 0 && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              工程ステップ（任意）
+              工程ステップ（任意・複数選択可）
             </label>
             <div className="flex flex-wrap gap-2">
-              {getAvailableSteps().map((step) => (
-                <button
-                  key={step}
-                  type="button"
-                  onClick={() => handleStepSelect(step)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    idea.工程ステップ === step
-                      ? 'bg-blue-500 text-white hover:bg-blue-600'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-                  }`}
-                >
-                  {step}
-                </button>
-              ))}
+              {getAvailableSteps().map((step) => {
+                const isSelected = (idea.工程ステップ || []).includes(step);
+                return (
+                  <button
+                    key={step}
+                    type="button"
+                    onClick={() => handleStepSelect(step)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isSelected
+                        ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                    }`}
+                  >
+                    {isSelected && '✓ '}
+                    {step}
+                  </button>
+                );
+              })}
             </div>
-            {idea.工程ステップ && (
+            {idea.工程ステップ && idea.工程ステップ.length > 0 && (
               <p className="text-xs text-gray-500 mt-2">
-                選択中: <span className="font-medium text-blue-600">{idea.工程ステップ}</span>
+                選択中: <span className="font-medium text-blue-600">{idea.工程ステップ.join('、')}</span>
               </p>
             )}
           </div>
